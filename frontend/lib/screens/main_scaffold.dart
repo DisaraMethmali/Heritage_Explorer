@@ -7,6 +7,7 @@ import 'home_screen.dart';
 import 'location_screen.dart';
 import 'recommendation_screen.dart';
 import 'about_screen.dart';
+import 'chat_screen.dart';
 
 class MainScaffold extends StatelessWidget {
   const MainScaffold({super.key});
@@ -42,7 +43,7 @@ class MainScaffold extends StatelessWidget {
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.info_outline),
-                label: "About",
+                label: "Chat",
               ),
             ],
           ),
@@ -55,6 +56,6 @@ class MainScaffold extends StatelessWidget {
     HomeScreen(),
     LocationScreen(),
     RecommendationScreen(),
-    AboutScreen(),
+    ChatScreen(),
   ];
 }
