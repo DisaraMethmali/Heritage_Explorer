@@ -1,0 +1,22 @@
+# Core ML / Data Processing
+numpy==1.26.4
+pandas==2.2.2
+scikit-learn==1.5.1
+geopy==2.4.1
+
+# TensorFlow & Keras
+tensorflow==2.20.0
+tf-keras==2.20.0
+
+# Embedding Models
+sentence-transformers==2.7.0
+transformers==4.44.2
+torch==2.4.1
+torchvision==0.19.1
+torchaudio==2.4.1
+
+# Vector Database
+faiss-cpu==1.12.0
+
+# Utilities
+matplotlib==3.9.2   # optional, for visualization
