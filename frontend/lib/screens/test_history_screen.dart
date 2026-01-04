@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../services/memory_test_service.dart';
 import 'package:intl/intl.dart';
 
 class TestHistoryScreen extends StatefulWidget {
@@ -22,17 +21,55 @@ class _TestHistoryScreenState extends State<TestHistoryScreen> {
   Future<void> _loadHistory() async {
     setState(() => _isLoading = true);
 
-    try {
-      final service = MemoryTestService();
-      final result = await service.getTestHistory(context);
+    // Simulate loading delay
+    await Future.delayed(const Duration(seconds: 1));
 
-      setState(() {
-        _data = result;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() => _isLoading = false);
-    }
+    // Hardcoded data
+    final result = {
+      "statistics": {
+        "total_tests": 5,
+        "average_score": 76.4,
+        "best_score": 92.0,
+        "latest_score": 85.0,
+      },
+      "history": [
+        {
+          "timestamp": DateTime.now().subtract(const Duration(days: 1)).toIso8601String(),
+          "score": 85.0,
+          "correct": 17,
+          "total": 20,
+        },
+        {
+          "timestamp": DateTime.now().subtract(const Duration(days: 3)).toIso8601String(),
+          "score": 92.0,
+          "correct": 18,
+          "total": 20,
+        },
+        {
+          "timestamp": DateTime.now().subtract(const Duration(days: 5)).toIso8601String(),
+          "score": 65.0,
+          "correct": 13,
+          "total": 20,
+        },
+        {
+          "timestamp": DateTime.now().subtract(const Duration(days: 7)).toIso8601String(),
+          "score": 50.0,
+          "correct": 10,
+          "total": 20,
+        },
+        {
+          "timestamp": DateTime.now().subtract(const Duration(days: 10)).toIso8601String(),
+          "score": 78.0,
+          "correct": 15,
+          "total": 20,
+        },
+      ],
+    };
+
+    setState(() {
+      _data = result;
+      _isLoading = false;
+    });
   }
 
   @override

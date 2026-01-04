@@ -7,15 +7,15 @@ class TestResultsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final score = results['score'] as double;
-    final correct = results['correct'] as int;
-    final total = results['total'] as int;
-    final resultsList = results['results'] as List;
+    final score = results['score'] as double? ?? 0.0;
+    final correct = results['correct'] as int? ?? 0;
+    final total = results['total'] as int? ?? 0;
+    final resultsList = results['results'] as List? ?? [];
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Test Results'),
-        automaticallyImplyLeading: false,
+        backgroundColor: const Color(0xFF004C7A),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -69,7 +69,7 @@ class TestResultsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             ...resultsList.map((result) {
-              final isCorrect = result['is_correct'] as bool;
+              final isCorrect = result['is_correct'] as bool? ?? false;
               return Card(
                 margin: const EdgeInsets.only(bottom: 16),
                 child: Padding(
@@ -86,7 +86,7 @@ class TestResultsScreen extends StatelessWidget {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              result['question'],
+                              result['question'] ?? 'Question missing',
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
                           ),
@@ -100,7 +100,7 @@ class TestResultsScreen extends StatelessWidget {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
-                          result['explanation'],
+                          result['explanation'] ?? 'No explanation',
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ),

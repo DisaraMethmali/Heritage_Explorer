@@ -187,7 +187,6 @@ class _MetricsScreenState extends State<MetricsScreen> {
                         const SizedBox(height: 24),
                         RlRewardsChart(data: _metrics!.rlRewards),
                         const SizedBox(height: 24),
-                        UserRatingsChart(data: _metrics!.userRatings),
                         const SizedBox(height: 24),
                         RetrievalTimeChart(data: _metrics!.ragPerformance),
                       ],

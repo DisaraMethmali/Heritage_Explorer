@@ -7,11 +7,13 @@ import '../widgets/message_bubble.dart';
 import '../widgets/typing_indicator.dart';
 import '../widgets/chat_input.dart';
 import '../widgets/star_rating.dart';
-import 'analytics_screen.dart';
 import 'profile_screen.dart';
+import 'login_screen.dart';
 
 class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
+  final String userId;
+
+  const ChatScreen({super.key, required this.userId});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -40,46 +42,51 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  /// ---------------- LOGOUT FUNCTION ----------------
+  Future<void> _logout() async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    await userProvider.logout();
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Logged out successfully'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final chatProvider = Provider.of<ChatProvider>(context);
-    final userProvider = Provider.of<UserProvider>(context);
 
-    // Auto-scroll when messages update
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
 
     return Scaffold(
       appBar: AppBar(
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Historical Chatbot', style: TextStyle(fontSize: 18)),
-            Text(
-              'Powered by RAG + RL + LoRA',
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w300),
-            ),
-          ],
-        ),
+        backgroundColor: const Color(0xFF004C7A),
+        foregroundColor: Colors.white,
+        centerTitle: true,
+        elevation: 4,
+        title: const Text('Historical Chatbot'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.analytics_outlined),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const AnalyticsScreen(),
-                ),
-              );
-            },
+            icon: const Icon(Icons.logout),
+            tooltip: 'Logout',
+            onPressed: _logout,
           ),
           IconButton(
             icon: const Icon(Icons.person_outline),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const ProfileScreen(),
-                ),
+                MaterialPageRoute(builder: (_) => const ProfileScreen()),
               );
             },
           ),
@@ -97,31 +104,26 @@ class _ChatScreenState extends State<ChatScreen> {
                     itemCount: chatProvider.messages.length,
                     itemBuilder: (context, index) {
                       final message = chatProvider.messages[index];
-
                       return Column(
                         crossAxisAlignment: message.isUser
                             ? CrossAxisAlignment.end
                             : CrossAxisAlignment.start,
                         children: [
                           MessageBubble(message: message),
-
-                          /// ⭐ STAR RATING (BOT ONLY, ONCE)
                           if (!message.isUser && message.rating == null)
                             Padding(
-                              padding: const EdgeInsets.only(
-                                left: 8,
-                                top: 4,
-                              ),
+                              padding:
+                                  const EdgeInsets.only(left: 8, top: 4),
                               child: NumberRating(
                                 maxRating: 5,
                                 onRate: (rating) {
-                                  // 🔍 DEBUG LOG (IMPORTANT)
                                   debugPrint(
-                                    "⭐ Rated: $rating for message ${message.id}",
+                                      "⭐ Rated: $rating for message ${message.id}");
+                                  chatProvider.sendFeedback(
+                                    message.id,
+                                    rating,
+                                    widget.userId,
                                   );
-
-                                chatProvider.sendFeedback('Rating: $rating'); 
-
                                 },
                               ),
                             ),
@@ -165,7 +167,7 @@ class _ChatScreenState extends State<ChatScreen> {
           ChatInput(
             enabled: !chatProvider.isLoading,
             onSend: (text) {
-              chatProvider.sendMessage(text);
+              chatProvider.sendMessage(text, widget.userId);
             },
           ),
         ],
@@ -181,10 +183,7 @@ class _ChatScreenState extends State<ChatScreen> {
           Icon(
             Icons.chat_bubble_outline,
             size: 80,
-            color: Theme.of(context)
-                .colorScheme
-                .primary
-                .withOpacity(0.3),
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
           ),
           const SizedBox(height: 16),
           Text(

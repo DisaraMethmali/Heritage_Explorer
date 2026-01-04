@@ -1,4 +1,4 @@
-// lib/main.dart (COMPLETE WITH ALL ROUTES AND PROVIDERS)
+// lib/main.dart (cleaned and fixed)
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -8,13 +8,16 @@ import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/profile_screen.dart';
-import 'screens/admin_dashboard.dart';
+
+// Admin screens
+import 'screens/admin_dashboard.dart';         // ✅ Only import once
+import 'screens/admin_reports_screen.dart';   // ✅ Only import once
+
+// Other screens
 import 'screens/memory_test_screen.dart';
 import 'screens/chat_history_screen.dart';
 import 'screens/test_history_screen.dart';
 import 'screens/preferences_screen.dart';
-import 'screens/admin_reports_screen.dart';
-import 'screens/main_scaffold.dart';
 
 // Providers
 import 'providers/chat_provider.dart';
@@ -37,18 +40,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        // AuthProvider for authentication
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-
-        // Provide ApiService first
         Provider<ApiService>(create: (_) => ApiService()),
-
-        // ChatProvider requires ApiService, so we inject it
         ChangeNotifierProvider<ChatProvider>(
           create: (context) => ChatProvider(apiService: context.read<ApiService>()),
         ),
-
-        // Other providers
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => MetricsProvider()),
       ],
@@ -58,36 +54,13 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
           useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: const Color(0xFF1565C0),
-            brightness: Brightness.light,
-          ),
-          cardTheme: const CardThemeData(
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12)),
-            ),
-          ),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
+          colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF1565C0)),
         ),
         darkTheme: ThemeData(
           useMaterial3: true,
           colorScheme: ColorScheme.fromSeed(
             seedColor: const Color(0xFF1565C0),
             brightness: Brightness.dark,
-          ),
-          cardTheme: const CardThemeData(
-            elevation: 2,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(12)),
-            ),
           ),
         ),
         themeMode: ThemeMode.system,
@@ -97,13 +70,13 @@ class MyApp extends StatelessWidget {
           '/login': (context) => const LoginScreen(),
           '/signup': (context) => const SignupScreen(),
           '/home': (context) => const HomeScreen(),
-          '/profile': (context) => const ProfileScreen(),
-          '/admin': (context) => const AdminDashboard(),
+          '/profile': (context) => ProfileScreen(), // removed const
           '/memory-test': (context) => const MemoryTestScreen(),
           '/chat-history': (context) => const ChatHistoryScreen(),
           '/test-history': (context) => const TestHistoryScreen(),
           '/preferences': (context) => const PreferencesScreen(),
-          '/admin-reports': (context) => const AdminReportsScreen(),
+          '/admin': (context) => AdminDashboard(),       // removed const
+          '/admin-reports': (context) => AdminReportsScreen(), // removed const
         },
       ),
     );

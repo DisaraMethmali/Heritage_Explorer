@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 
 class AdminService {
-  static const String baseUrl = 'http://192.168.1.100:5000/api';
+  static const String baseUrl = 'http://192.168.1.6:5000/api';
 
   Future<Map<String, dynamic>> getMostAskedQuestions(
       BuildContext context) async {

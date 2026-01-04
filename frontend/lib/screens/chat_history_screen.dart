@@ -1,10 +1,4 @@
-// ============================================================================
-// FILE 4: lib/screens/chat_history_screen.dart
-// ============================================================================
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart';
-import '../services/history_service.dart';
 import 'package:intl/intl.dart';
 
 class ChatHistoryScreen extends StatefulWidget {
@@ -15,7 +9,7 @@ class ChatHistoryScreen extends StatefulWidget {
 }
 
 class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
-  List<dynamic>? _history;
+  List<Map<String, dynamic>>? _history;
   bool _isLoading = true;
 
   @override
@@ -27,22 +21,52 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
   Future<void> _loadHistory() async {
     setState(() => _isLoading = true);
 
-    try {
-      final service = HistoryService();
-      final result = await service.getChatHistory(context);
+    // Simulate loading delay
+    await Future.delayed(const Duration(seconds: 1));
 
-      setState(() {
-        _history = result['history'];
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() => _isLoading = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading history: $e')),
-        );
-      }
-    }
+    // Hardcoded chat history
+    final hardcodedHistory = [
+      {
+        'timestamp': DateTime.now().subtract(const Duration(hours: 1)).toIso8601String(),
+        'query': 'Tell me about the first king of Sri Lanka.',
+        'answer': 'The first king of Sri Lanka was Vijaya.',
+        'topic': 'King',
+        'intent': 'person',
+      },
+      {
+        'timestamp': DateTime.now().subtract(const Duration(days: 1, hours: 2)).toIso8601String(),
+        'query': 'What are the main festivals in Kandy?',
+        'answer': 'The main festival in Kandy is the Esala Perahera.',
+        'topic': 'Festival',
+        'intent': 'description',
+      },
+      {
+        'timestamp': DateTime.now().subtract(const Duration(days: 2)).toIso8601String(),
+        'query': 'Show me famous temples in Sri Lanka.',
+        'answer': 'Some famous temples include Temple of the Tooth, Ruwanwelisaya, and Jetavanaramaya.',
+        'topic': 'Temple',
+        'intent': 'place',
+      },
+      {
+        'timestamp': DateTime.now().subtract(const Duration(days: 3, hours: 4)).toIso8601String(),
+        'query': 'Hello, how are you?',
+        'answer': 'Hello! I am here to help you with Sri Lankan history.',
+        'topic': 'Greeting',
+        'intent': 'greeting',
+      },
+      {
+        'timestamp': DateTime.now().subtract(const Duration(days: 5)).toIso8601String(),
+        'query': 'What is Buddhism?',
+        'answer': 'Buddhism is a religion and philosophy based on the teachings of Siddhartha Gautama.',
+        'topic': 'Buddhism',
+        'intent': 'description',
+      },
+    ];
+
+    setState(() {
+      _history = hardcodedHistory;
+      _isLoading = false;
+    });
   }
 
   @override
@@ -78,7 +102,7 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                     itemBuilder: (context, index) {
                       final message = _history![index];
                       final timestamp = DateTime.parse(message['timestamp']);
-                      
+
                       return Card(
                         margin: const EdgeInsets.only(bottom: 12),
                         child: ExpansionTile(
@@ -92,8 +116,7 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                             overflow: TextOverflow.ellipsis,
                           ),
                           subtitle: Text(
-                            DateFormat('MMM dd, yyyy - hh:mm a')
-                                .format(timestamp),
+                            DateFormat('MMM dd, yyyy - hh:mm a').format(timestamp),
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                           children: [
@@ -115,14 +138,12 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
                                     children: [
                                       Chip(
                                         label: Text(message['topic']),
-                                        avatar: const Icon(Icons.label,
-                                            size: 16),
+                                        avatar: const Icon(Icons.label, size: 16),
                                       ),
                                       const SizedBox(width: 8),
                                       Chip(
                                         label: Text(message['intent']),
-                                        avatar: const Icon(Icons.category,
-                                            size: 16),
+                                        avatar: const Icon(Icons.category, size: 16),
                                       ),
                                     ],
                                   ),

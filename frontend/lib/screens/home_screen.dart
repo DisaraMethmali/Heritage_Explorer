@@ -1,7 +1,8 @@
 // frontend/lib/screens/home_screen.dart
 
 import 'package:flutter/material.dart';
-import 'location_screen.dart';
+import 'location_screen.dart';       // Import for the location screen (if needed)
+import 'main_scaffold.dart';        // Import for MainScaffold navigation
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -41,7 +42,7 @@ class HomeScreen extends StatelessWidget {
                   borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.15),
+                      color: Colors.black.withOpacity(0.15),
                       blurRadius: 10,
                       offset: const Offset(0, 5),
                     ),
@@ -82,7 +83,7 @@ class HomeScreen extends StatelessWidget {
 
               const SizedBox(height: 50),
 
-              // Detect My Location Button
+              // Detect My Location Button → navigates to MainScaffold
               ElevatedButton.icon(
                 icon: const Icon(Icons.my_location),
                 label: const Text("Detect My Location"),
@@ -103,10 +104,10 @@ class HomeScreen extends StatelessWidget {
                   elevation: 6,
                 ),
                 onPressed: () {
-                  Navigator.push(
+                  Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const LocationScreen(),
+                      builder: (_) => const MainScaffold(),
                     ),
                   );
                 },

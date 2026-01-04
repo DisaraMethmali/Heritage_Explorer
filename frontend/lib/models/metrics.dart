@@ -1,102 +1,97 @@
 // lib/models/metrics.dart
 
-class RlReward {
-  final String name;
-  final double value;
+/// -------------------- DATA MODELS --------------------
 
-  RlReward({required this.name, required this.value});
-
-  factory RlReward.fromJson(Map<String, dynamic> json) {
-    return RlReward(
-      name: json['name'] ?? '',
-      value: (json['value'] as num?)?.toDouble() ?? 0.0,
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-        'name': name,
-        'value': value,
-      };
-}
-
-class TrainingMetric {
-  final int step;
-  final double loss;
-
-  TrainingMetric({required this.step, required this.loss});
-
-  factory TrainingMetric.fromJson(Map<String, dynamic> json) {
-    return TrainingMetric(
-      step: json['step'] ?? 0,
-      loss: (json['loss'] as num?)?.toDouble() ?? 0.0,
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-        'step': step,
-        'loss': loss,
-      };
-}
-
+/// Represents the execution time of a single query
 class QueryTime {
   final String query;
   final double time;
 
-  QueryTime({required this.query, required this.time});
-
-  factory QueryTime.fromJson(Map<String, dynamic> json) {
-    return QueryTime(
-      query: json['query'] ?? '',
-      time: (json['time'] as num?)?.toDouble() ?? 0.0,
-    );
-  }
-
-  Map<String, dynamic> toJson() => {
-        'query': query,
-        'time': time,
-      };
-}
-
-class Metrics {
-  final List<TrainingMetric> trainingMetrics;
-  final List<QueryTime> queryTimes;
-  final Map<String, int> intentDistribution;
-  final Map<String, int> topicDistribution;
-  final List<RlReward> rlRewards; // ✅ now works
-
-  Metrics({
-    required this.trainingMetrics,
-    required this.queryTimes,
-    required this.intentDistribution,
-    required this.topicDistribution,
-    required this.rlRewards, // ✅ required
+  QueryTime({
+    required this.query,
+    required this.time,
   });
 
-  factory Metrics.fromJson(Map<String, dynamic> json) {
-    return Metrics(
-      trainingMetrics: (json['trainingMetrics'] as List<dynamic>?)
-              ?.map((e) => TrainingMetric.fromJson(e))
-              .toList() ??
-          [],
-      queryTimes: (json['queryTimes'] as List<dynamic>?)
-              ?.map((e) => QueryTime.fromJson(e))
-              .toList() ??
-          [],
-      intentDistribution:
-          Map<String, int>.from(json['intentDistribution'] ?? {}),
-      topicDistribution: Map<String, int>.from(json['topicDistribution'] ?? {}),
-      rlRewards: (json['rlRewards'] as List<dynamic>?)
-              ?.map((e) => RlReward.fromJson(e))
-              .toList() ??
-          [],
+  /// Factory constructor for JSON deserialization
+  factory QueryTime.fromJson(Map<String, dynamic> json) {
+    return QueryTime(
+      query: json['query'] as String,
+      time: (json['time'] as num).toDouble(),
     );
   }
 
-  Map<String, dynamic> toJson() => {
-        'trainingMetrics': trainingMetrics.map((e) => e.toJson()).toList(),
-        'queryTimes': queryTimes.map((e) => e.toJson()).toList(),
-        'intentDistribution': intentDistribution,
-        'topicDistribution': topicDistribution,
-        'rlRewards': rlRewards.map((e) => e.toJson()).toList(),
-      };
+  /// Convert to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'query': query,
+      'time': time,
+    };
+  }
+}
+
+/// Represents a training metric (step and loss)
+class TrainingMetric {
+  final int step;
+  final double loss;
+
+  TrainingMetric({
+    required this.step,
+    required this.loss,
+  });
+
+  /// Factory constructor for JSON deserialization
+  factory TrainingMetric.fromJson(Map<String, dynamic> json) {
+    return TrainingMetric(
+      step: json['step'] as int,
+      loss: (json['loss'] as num).toDouble(),
+    );
+  }
+
+  /// Convert to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'step': step,
+      'loss': loss,
+    };
+  }
+}
+
+/// Represents all metrics for analytics
+class Metrics {
+  final Map<String, int> intentDistribution;
+  final Map<String, int> topicDistribution;
+  final List<TrainingMetric> trainingMetrics;
+  final List<QueryTime> queryTimes;
+
+  Metrics({
+    required this.intentDistribution,
+    required this.topicDistribution,
+    required this.trainingMetrics,
+    required this.queryTimes,
+  });
+
+  /// Factory constructor to create Metrics from JSON
+  factory Metrics.fromJson(Map<String, dynamic> json) {
+    return Metrics(
+      intentDistribution: Map<String, int>.from(json['intent_distribution']),
+      topicDistribution: Map<String, int>.from(json['topic_distribution']),
+      trainingMetrics: (json['training_metrics'] as List)
+          .map((e) => TrainingMetric.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      queryTimes: (json['query_times'] as List)
+          .map((e) => QueryTime.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+
+  /// Convert Metrics object to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'intent_distribution': intentDistribution,
+      'topic_distribution': topicDistribution,
+      'training_metrics':
+          trainingMetrics.map((e) => e.toJson()).toList(),
+      'query_times': queryTimes.map((e) => e.toJson()).toList(),
+    };
+  }
 }

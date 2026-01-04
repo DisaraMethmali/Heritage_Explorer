@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 
 class MemoryTestService {
-  static const String baseUrl = 'http://192.168.1.100:5000/api';
+  static const String baseUrl = 'http://192.168.1.6:5000/api';
 
   Future<Map<String, dynamic>> getQuestions(BuildContext context) async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
