@@ -7,6 +7,8 @@ import 'package:http/http.dart' as http;
 import '../utils/config.dart';
 import '../state/geo_state.dart';
 import 'vr_screen.dart';
+import '../state/session_state.dart';
+import 'session_report_screen.dart';
 
 class HeritageScreen extends StatefulWidget {
   final String siteName;
@@ -47,6 +49,13 @@ class _HeritageScreenState extends State<HeritageScreen> {
   void initState() {
     super.initState();
     displayedEvents = widget.events;
+
+    // SESSION LOGGING — site visit
+    SessionState.visitedSites.add({
+      "site_id": widget.siteId,
+      "site_name": widget.siteName,
+      "timestamp": DateTime.now().toIso8601String(),
+    });
   }
 
   // SHARED POPUP
@@ -154,6 +163,17 @@ class _HeritageScreenState extends State<HeritageScreen> {
   // Function to call backend /events/filter
   Future<void> _filterEvents(int minYear, int maxYear) async {
     setState(() => isLoading = true);
+
+    // SESSION LOGGING — year range selection
+    final selectedLabel = yearRanges
+    .firstWhere((r) => r["min"] == minYear && r["max"] == maxYear)["label"];
+    
+    SessionState.yearSelections.add({
+      "site_id": widget.siteId,
+      "range": selectedLabel,
+      "timestamp": DateTime.now().toIso8601String(),
+    });
+
     const backendUrl = "$baseUrl/events/filter";
     // const backendUrl = "http://192.168.1.4:5000/events/filter";
 
@@ -301,13 +321,30 @@ class _HeritageScreenState extends State<HeritageScreen> {
         foregroundColor: Colors.white,
         centerTitle: true,
         elevation: 4,
-        title: Text(
-          widget.siteName,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5,
+        title: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            widget.siteName,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.5,
+            ),
           ),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.description_outlined),
+            tooltip: "Session Report",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const SessionReportScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       
       // SafeArea prevents bottom-bar overlapping UI
@@ -440,7 +477,18 @@ class _HeritageScreenState extends State<HeritageScreen> {
                 Column(
                   children: displayedEvents.map((e) {
                     return InkWell(
-                      onTap: _showUnifiedPopup, // EVENT CARD CLICK
+                      onTap: () {
+                        // SESSION LOGGING — event click
+                        SessionState.selectedEvents.add({
+                          "event_name": e["event_name"],
+                          "year": e["year"],
+                          "site_name": widget.siteName,
+                          "timestamp": DateTime.now().toIso8601String(),
+                        });
+
+                        // EXISTING BEHAVIOR
+                        _showUnifiedPopup();
+                      },
                       borderRadius: BorderRadius.circular(15),
                       child: Card(
                         elevation: 5,

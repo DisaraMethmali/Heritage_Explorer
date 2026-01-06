@@ -202,9 +202,13 @@ class _MapRouteScreenState extends State<MapRouteScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Route to ${widget.siteName}",
-          style: const TextStyle(fontWeight: FontWeight.bold),
+        centerTitle: true,
+        title: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            "Route to ${widget.siteName}",
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
         ),
         backgroundColor: const Color(0xFF004C7A),
         foregroundColor: Colors.white,

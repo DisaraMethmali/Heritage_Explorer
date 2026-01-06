@@ -66,9 +66,6 @@ def recommend_nearby():
     data = request.get_json()
     lat, lon = data.get("lat"), data.get("lon")
 
-    # Default radius = 1500 m
-    radius_m = data.get("radius_m", 1500)
-
     if lat is None or lon is None:
         return jsonify({"error": "lat & lon required"}), 400
 
@@ -79,31 +76,29 @@ def recommend_nearby():
     # 2. Filter to sites in that cluster
     cluster_subset = df[df["cluster"] == cluster_id]
 
-    final_results = []
-
     # 3. Check geofence & return events for that site
     unique_sites = cluster_subset.drop_duplicates(subset=["site_id"])
+    results = []
 
     for _, row in unique_sites.iterrows():
-
         dist = haversine(lat, lon, row["lat"], row["lon"])
 
-        if dist <= radius_m:
+        site_events = df[df["site_id"] == row["site_id"]][
+            ["event_name", "year", "description"]
+        ].to_dict(orient="records")
 
-            # extract all events for this site
-            site_events = df[df["site_id"] == row["site_id"]][
-                ["event_name", "year", "description"]
-            ].to_dict(orient="records")
+        results.append({
+            "site_id": row["site_id"],
+            "site_name": row["site_name"],
+            "distance_m": round(dist, 2),
+            "events": site_events
+        })
 
-            final_results.append({
-                "site_id": row["site_id"],
-                "site_name": row["site_name"],
-                "distance_m": round(dist, 2),
-                "events": site_events
-            })
+    # IMPORTANT PART
+    results.sort(key=lambda x: x["distance_m"])
+    top_3 = results[:3]
 
     return jsonify({
         "user_cluster": cluster_id,
-        "radius_m": radius_m,
-        "nearby": final_results
+        "recommended": top_3
     })

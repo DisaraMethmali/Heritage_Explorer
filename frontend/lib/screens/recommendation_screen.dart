@@ -80,7 +80,7 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
                     ),
                     SizedBox(height: 12),
                     Text(
-                      "Move closer to a heritage site to discover ancient events around you.",
+                      "Pull to refresh or move closer to a heritage site to discover ancient events around you.",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 16,
@@ -97,18 +97,21 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
     );
   }
 
-  // MAIN CONTENT (With data)
+  // MAIN CONTENT (TOP 3 SITES)
   Widget _buildRecommendationContent() {
+    final sites = RecommendationState.recommendedSites;
+
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: sites.map((site) {
+          final List<Map<String, dynamic>> events =
+              List<Map<String, dynamic>>.from(site["events"] ?? []);
 
-          // SITE HEADER CARD (IMAGE REMOVED)
-          Card(
+          return Card(
             elevation: 8,
+            margin: const EdgeInsets.only(bottom: 24),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
@@ -120,7 +123,7 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
 
                   // SITE NAME
                   Text(
-                    RecommendationState.siteName!,
+                    site["site_name"],
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -128,7 +131,19 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 6),
+
+                  // DISTANCE
+                  if (site["distance_m"] != null)
+                    Text(
+                      "Distance: ${(site["distance_m"] / 1000).toStringAsFixed(2)} km",
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Colors.black54,
+                      ),
+                    ),
+
+                  const SizedBox(height: 12),
 
                   // STATIC DESCRIPTION
                   const Text(
@@ -139,92 +154,101 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
                       height: 1.4,
                     ),
                   ),
+
+                  const SizedBox(height: 20),
+
+                  // EVENTS HEADER
+                  const Text(
+                    "Ancient Events",
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFB8860B),
+                    ),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // EVENTS LIST
+                  if (events.isEmpty)
+                    const Text(
+                      "No recorded events for this site.",
+                      style: TextStyle(color: Colors.black54),
+                    )
+                  else
+                    Column(
+                      children: events.map((e) {
+                        return Card(
+                          elevation: 4,
+                          margin: const EdgeInsets.only(bottom: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(14),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+
+                                // EVENT TITLE
+                                Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.history_edu,
+                                      color: Color(0xFF004C7A),
+                                      size: 24,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Text(
+                                        e["event_name"] ?? "Untitled Event",
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF004C7A),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+
+                                if (e["year"] != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 6),
+                                    child: Text(
+                                      e["year"].toString(),
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontStyle: FontStyle.italic,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                  ),
+
+                                const SizedBox(height: 8),
+
+                                // EVENT DESCRIPTION
+                                Text(
+                                  e["description"] ??
+                                      "No description available for this event.",
+                                  textAlign: TextAlign.justify,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    height: 1.5,
+                                    color: Colors.black87,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
                 ],
               ),
             ),
-          ),
-
-          const SizedBox(height: 30),
-
-          // EVENTS HEADER
-          const Text(
-            "Ancient Events",
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFFB8860B),
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // EVENTS LIST
-          Column(
-            children: RecommendationState.events.map((e) {
-              return Card(
-                elevation: 5,
-                margin: const EdgeInsets.only(bottom: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-
-                      // EVENT TITLE
-                      Row(
-                        children: [
-                          const Icon(Icons.history_edu,
-                              color: Color(0xFF004C7A), size: 26),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              e["event_name"] ?? "Untitled Event",
-                              style: const TextStyle(
-                                fontSize: 17,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF004C7A),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      if (e["year"] != null)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 6),
-                          child: Text(
-                            e["year"].toString(),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontStyle: FontStyle.italic,
-                              color: Colors.black54,
-                            ),
-                          ),
-                        ),
-
-                      const SizedBox(height: 10),
-
-                      // EVENT DESCRIPTION
-                      Text(
-                        e["description"] ??
-                            "No description available for this event.",
-                        textAlign: TextAlign.justify,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          height: 1.5,
-                          color: Colors.black87,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        ],
+          );
+        }).toList(),
       ),
     );
   }

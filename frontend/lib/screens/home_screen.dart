@@ -1,7 +1,7 @@
 // frontend/lib/screens/home_screen.dart
 
 import 'package:flutter/material.dart';
-import 'location_screen.dart';
+import '../state/navigation_state.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -103,12 +103,7 @@ class HomeScreen extends StatelessWidget {
                   elevation: 6,
                 ),
                 onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const LocationScreen(),
-                    ),
-                  );
+                  NavigationState.selectedIndex.value = 1; // Location tab
                 },
               ),
             ],
