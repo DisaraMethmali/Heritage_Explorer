@@ -1,8 +1,7 @@
-// lib/screens/splash_screen.dart
+// frontend/lib/screens/splash_screen.dart (attractive loading page)
+
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart';
 import 'main_scaffold.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -21,7 +20,6 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    // Fade animation
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
@@ -30,42 +28,12 @@ class _SplashScreenState extends State<SplashScreen>
         CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
     _controller.forward();
 
-    // Initialize app & handle navigation
-    _initializeApp();
-  }
-
-  Future<void> _initializeApp() async {
-    try {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-
-      // Initialize authentication (check saved token)
-      await authProvider.init();
-
-      // Keep splash visible for 3 seconds
-      await Future.delayed(const Duration(seconds: 3));
-
-      if (!mounted) return;
-
-      // Conditional navigation based on authentication
-      if (authProvider.isLoggedIn) {
-        if (authProvider.isAdmin) {
-          Navigator.of(context).pushReplacementNamed('/admin');
-        } else {
-          Navigator.of(context).pushReplacementNamed('/home');
-        }
-      } else {
-        Navigator.of(context).pushReplacementNamed('/login');
-      }
-    } catch (e) {
-      debugPrint('SplashScreen error: $e');
-      if (mounted) {
-        // Fallback to main scaffold if error occurs
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const MainScaffold()),
-        );
-      }
-    }
+    Timer(const Duration(seconds: 3), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MainScaffold()),
+      );
+    });
   }
 
   @override
@@ -77,9 +45,9 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
+      body: SafeArea(   // Added SafeArea 
         child: Container(
-          // Warm gradient background
+          // Beautiful warm gradient background
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               colors: [
@@ -90,6 +58,7 @@ class _SplashScreenState extends State<SplashScreen>
               end: Alignment.bottomCenter,
             ),
           ),
+
           child: FadeTransition(
             opacity: _fadeAnimation,
             child: Center(
@@ -105,7 +74,7 @@ class _SplashScreenState extends State<SplashScreen>
                       borderRadius: BorderRadius.circular(30),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
+                          color: Colors.black.withValues(alpha: 0.15),
                           blurRadius: 10,
                           offset: const Offset(0, 5),
                         ),
@@ -133,9 +102,8 @@ class _SplashScreenState extends State<SplashScreen>
                     ),
                   ),
 
-                  const SizedBox(height: 10),
-
                   // Tagline
+                  const SizedBox(height: 10),
                   const Text(
                     "Discover Sri Lanka’s Living History",
                     textAlign: TextAlign.center,
@@ -152,18 +120,6 @@ class _SplashScreenState extends State<SplashScreen>
                   const CircularProgressIndicator(
                     color: Color(0xFF1565C0),
                     strokeWidth: 3,
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // Loading text
-                  const Text(
-                    "Loading...",
-                    style: TextStyle(
-                      color: Color(0xFF004B8D),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                    ),
                   ),
                 ],
               ),

@@ -1,24 +1,38 @@
-// frontend/lib/screens/main_scaffold.dart (Bottom Navigation Scaffold - Main container for the app after splash.)
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../state/navigation_state.dart';
+import '../providers/user_provider.dart';
+
 import 'home_screen.dart';
 import 'location_screen.dart';
 import 'recommendation_screen.dart';
 import 'about_screen.dart';
+import 'chat_screen.dart';
+import 'king_conversation_screen.dart';
 
 class MainScaffold extends StatelessWidget {
   const MainScaffold({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Get userId from UserProvider
+    final userId = Provider.of<UserProvider>(context, listen: false).userId;
+
+    // Screens that require userId must be initialized here
+    final List<Widget> screens = [
+      const HomeScreen(),
+      const LocationScreen(),
+      const RecommendationScreen(),
+      ChatScreen(userId: userId), // pass userId here
+      const KingConversationScreen(),
+    ];
+
     return ValueListenableBuilder<int>(
       valueListenable: NavigationState.selectedIndex,
       builder: (context, currentIndex, _) {
         return Scaffold(
-          body: _screens[currentIndex],
-
+          body: screens[currentIndex],
           bottomNavigationBar: BottomNavigationBar(
             currentIndex: currentIndex,
             type: BottomNavigationBarType.fixed,
@@ -41,8 +55,12 @@ class MainScaffold extends StatelessWidget {
                 label: "Recommend",
               ),
               BottomNavigationBarItem(
-                icon: Icon(Icons.info_outline),
-                label: "About",
+                icon: Icon(Icons.chat),
+                label: "Chat",
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.menu_book), // icon for king conversation
+                label: "Story",
               ),
             ],
           ),
@@ -50,11 +68,4 @@ class MainScaffold extends StatelessWidget {
       },
     );
   }
-
-  static const List<Widget> _screens = [
-    HomeScreen(),
-    LocationScreen(),
-    RecommendationScreen(),
-    AboutScreen(),
-  ];
 }
