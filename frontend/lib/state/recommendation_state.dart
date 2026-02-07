@@ -1,17 +1,19 @@
-// frontend/lib/state/recommendation_state.dart (Create global shared recommendation state, 
-//                                                holds latest recommendatin from notification)
+// frontend/lib/state/recommendation_state.dart
+// Global shared recommendation state
+// Holds latest top-3 recommendations received from background notification
 
 class RecommendationState {
-  static int? siteId;
-  static String? siteName;
-  static List<Map<String, dynamic>> events = []; 
 
+  // List of recommended heritage sites (top 3)
+  // Each item contains: site_id, site_name, distance_m, events[]
+  static List<Map<String, dynamic>> recommendedSites = [];
+
+  // Convenience getter
   static bool get hasRecommendation =>
-      siteId != null && events.isNotEmpty;
+      recommendedSites.isNotEmpty;
 
+  // Clear all stored recommendations
   static void clear() {
-    siteId = null;
-    siteName = null;
-    events.clear();
+    recommendedSites.clear();
   }
 }

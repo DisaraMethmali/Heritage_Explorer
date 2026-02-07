@@ -33,8 +33,8 @@ class _LocationScreenState extends State<LocationScreen> {
   double? _currentLon;
 
   // last fetched coords (for smart update) / comment when testing
-  double? _lastLat; 
-  double? _lastLon;
+  // double? _lastLat; 
+  // double? _lastLon;
 
   // heritage site coords
   double? _destLat;
@@ -100,46 +100,46 @@ class _LocationScreenState extends State<LocationScreen> {
   }
 
   // SMART AUTO UPDATE SYSTEM
-  void _startSmartAutoUpdate() {
-    _autoTimer = Timer.periodic(const Duration(seconds: 20), (timer) async {
-      // Get current location first
-      Position pos = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
+  // void _startSmartAutoUpdate() {
+  //   _autoTimer = Timer.periodic(const Duration(seconds: 20), (timer) async {
+  //     // Get current location first
+  //     Position pos = await Geolocator.getCurrentPosition(
+  //       desiredAccuracy: LocationAccuracy.high,
+  //     );
 
-      double newLat = pos.latitude;
-      double newLon = pos.longitude;
+  //     double newLat = pos.latitude;
+  //     double newLon = pos.longitude;
 
-      // If this is the first run, save and stop here
-      if (_lastLat == null || _lastLon == null) {
-        _lastLat = newLat;
-        _lastLon = newLon;
-        return;
-      }
+  //     // If this is the first run, save and stop here
+  //     if (_lastLat == null || _lastLon == null) {
+  //       _lastLat = newLat;
+  //       _lastLon = newLon;
+  //       return;
+  //     }
 
-      // Check distance moved
-      double moved = Geolocator.distanceBetween(
-        _lastLat!, _lastLon!,
-        newLat, newLon,
-      );
+  //     // Check distance moved
+  //     double moved = Geolocator.distanceBetween(
+  //       _lastLat!, _lastLon!,
+  //       newLat, newLon,
+  //     );
 
-      if (moved < 300) {
-        return; // NOT enough movement → skip backend call
-      }
+  //     if (moved < 300) {
+  //       return; // NOT enough movement → skip backend call
+  //     }
 
-      // If moved > 300m → update backend
-      await _fetchAndSend();
+  //     // If moved > 300m → update backend
+  //     await _fetchAndSend();
 
-      // update last known position
-      _lastLat = newLat;
-      _lastLon = newLon;
-    });
-  }
+  //     // update last known position
+  //     _lastLat = newLat;
+  //     _lastLon = newLon;
+  //   });
+  // }
 
   // Fake GPS for testing - Disable Auto update during testing
-  // void _startSmartAutoUpdate() {
-  //   return;  // prevents real GPS from overwriting fake GPS
-  // }
+  void _startSmartAutoUpdate() {
+    return;  // prevents real GPS from overwriting fake GPS
+  }
 
   // GET CURRENT LOCATION + CALL BACKEND
   Future<void> _fetchAndSend() async {
@@ -148,21 +148,21 @@ class _LocationScreenState extends State<LocationScreen> {
         loadingMessage = "Fetching nearby heritage sites...";
       });
 
-      Position pos = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-
-      // Save user location
-      _currentLat = pos.latitude;
-      _currentLon = pos.longitude;
-
-      // Fake GPS for testing
-      // double fakeLat = 7.2936;
-      // double fakeLon = 80.6413;
+      // Position pos = await Geolocator.getCurrentPosition(
+      //   desiredAccuracy: LocationAccuracy.high,
+      // );
 
       // // Save user location
-      // _currentLat = fakeLat;
-      // _currentLon = fakeLon;
+      // _currentLat = pos.latitude;
+      // _currentLon = pos.longitude;
+
+      // Fake GPS for testing
+      double fakeLat = 7.2902;
+      double fakeLon = 80.6337;
+
+      // Save user location
+      _currentLat = fakeLat;
+      _currentLon = fakeLon;
 
       const backendUrl = "$baseUrl/location";
       // const backendUrl = "http://192.168.1.4:5000/location";
@@ -326,6 +326,7 @@ class _LocationScreenState extends State<LocationScreen> {
 
                                   Text(
                                     userPlace,
+                                    textAlign: TextAlign.center,
                                     style: const TextStyle(
                                       fontSize: 22,
                                       fontWeight: FontWeight.bold,

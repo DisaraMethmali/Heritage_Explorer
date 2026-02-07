@@ -14,8 +14,8 @@ class LocationMonitor {
   static Timer? _timer;
   static bool _isRunning = false;
 
-  // Prevent repeated notifications for same site
-  static int? _lastNotifiedSiteId;
+  // Prevent repeated notifications for same nearest site
+  static int? _lastNotifiedPrimarySiteId;
 
   // BACKGROUND PERIODIC MONITOR
   static void start() {
@@ -31,7 +31,7 @@ class LocationMonitor {
     _timer?.cancel();
     _timer = null;
     _isRunning = false;
-    _lastNotifiedSiteId = null;
+    _lastNotifiedPrimarySiteId = null;
   }
 
   // MANUAL ONE-TIME CHECK (PULL TO REFRESH)
@@ -53,60 +53,71 @@ class LocationMonitor {
         return;
       }
 
-      Position pos = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-      );
-
-      final res = await http.post(
-        Uri.parse("$baseUrl/recommend-nearby"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "lat": pos.latitude,
-          "lon": pos.longitude,
-          "radius_m": 1500,
-        }),
-      );
-
-      // Fake GPS for testing
-      // final double lat = 7.2936;
-      // final double lon = 80.6413;
+      // Position pos = await Geolocator.getCurrentPosition(
+      //   desiredAccuracy: LocationAccuracy.high,
+      // );
 
       // final res = await http.post(
       //   Uri.parse("$baseUrl/recommend-nearby"),
       //   headers: {"Content-Type": "application/json"},
       //   body: jsonEncode({
-      //     "lat": lat,
-      //     "lon": lon,
+      //     "lat": pos.latitude,
+      //     "lon": pos.longitude,
       //     "radius_m": 1500,
       //   }),
       // );
 
+      // Fake GPS for testing
+      final double lat = 7.2902;
+      final double lon = 80.6337;
+
+      final res = await http.post(
+        Uri.parse("$baseUrl/recommend-nearby"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "lat": lat,
+          "lon": lon,
+          "radius_m": 1500,
+        }),
+      );
+
       if (res.statusCode != 200) return;
 
       final data = jsonDecode(res.body);
-      if (data["nearby"] == null || data["nearby"].isEmpty) return;
+      if (data["recommended"] == null || data["recommended"].isEmpty) {
+        return;
+      }
 
-      final site = data["nearby"][0];
-      final int siteId = site["site_id"];
+      final List<dynamic> sites = data["recommended"];
 
-      // Skip notification if already notified (unless forced refresh), DO NOT notify again for same site
-      if (!force && _lastNotifiedSiteId == siteId) return;
+      // Nearest site is always index 0 (already sorted by backend)
+      final int primarySiteId = sites[0]["site_id"];
 
-      _lastNotifiedSiteId = siteId;
+      // Prevent repeated notifications
+      if (!force &&
+          _lastNotifiedPrimarySiteId == primarySiteId) {
+        return;
+      }
 
-      // Save recommendation globally
-      RecommendationState.siteId = siteId;
-      RecommendationState.siteName = site["site_name"];
-      RecommendationState.events =
-          List<Map<String, dynamic>>.from(site["events"]);
+      _lastNotifiedPrimarySiteId = primarySiteId;
 
-      // Fire notification
+      // Save ALL 3 recommendations globally
+      RecommendationState.recommendedSites =
+          List<Map<String, dynamic>>.from(sites);
+
+      // Build clean notification message
+      final String notificationBody =
+          "You’re near ${sites[0]['site_name']}, "
+          "${sites[1]['site_name']}, and "
+          "${sites[2]['site_name']}. Tap to explore ancient events.";
+
+      // Fire ONE aggregated notification
       await NotificationService.showNearbyNotification(
-        "Nearby Heritage Site",
-        "You're near ${site['site_name']}. Explore its ancient events!",
+        "Nearby Heritage Sites",
+        notificationBody,
       );
     } catch (_) {
-      // intentionally silent
+      // intentionally silent to avoid background crashes
     }
   }
 }

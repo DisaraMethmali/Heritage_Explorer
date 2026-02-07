@@ -1,6 +1,7 @@
 // frontend/lib/screens/home_screen.dart
 
 import 'package:flutter/material.dart';
+import '../state/navigation_state.dart';
 import 'location_screen.dart';       // Import for the location screen (if needed)
 import 'main_scaffold.dart';        // Import for MainScaffold navigation
 
