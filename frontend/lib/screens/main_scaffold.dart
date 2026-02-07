@@ -52,7 +52,7 @@ class MainScaffold extends StatelessWidget {
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.recommend),
-                label: "Recommend",
+                label: "Nearby",
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.chat),
