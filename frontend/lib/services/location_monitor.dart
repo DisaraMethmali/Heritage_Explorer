@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 
 import '../services/notification_service.dart';
 import '../state/recommendation_state.dart';
+import '../state/user_location_state.dart';
 import '../utils/config.dart';
 
 class LocationMonitor {
@@ -53,23 +54,21 @@ class LocationMonitor {
         return;
       }
 
+      // Get real-time position
       // Position pos = await Geolocator.getCurrentPosition(
       //   desiredAccuracy: LocationAccuracy.high,
       // );
 
-      // final res = await http.post(
-      //   Uri.parse("$baseUrl/recommend-nearby"),
-      //   headers: {"Content-Type": "application/json"},
-      //   body: jsonEncode({
-      //     "lat": pos.latitude,
-      //     "lon": pos.longitude,
-      //     "radius_m": 1500,
-      //   }),
-      // );
+      // final double lat = pos.latitude;
+      // final double lon = pos.longitude;
 
       // Fake GPS for testing
       final double lat = 7.2902;
       final double lon = 80.6337;
+
+      // SAVE USER LOCATION GLOBALLY
+      UserLocationState.userLat = lat;
+      UserLocationState.userLon = lon;
 
       final res = await http.post(
         Uri.parse("$baseUrl/recommend-nearby"),
@@ -77,7 +76,6 @@ class LocationMonitor {
         body: jsonEncode({
           "lat": lat,
           "lon": lon,
-          "radius_m": 1500,
         }),
       );
 
@@ -101,9 +99,8 @@ class LocationMonitor {
 
       _lastNotifiedPrimarySiteId = primarySiteId;
 
-      // Save ALL 3 recommendations globally
-      RecommendationState.recommendedSites =
-          List<Map<String, dynamic>>.from(sites);
+      // Save FULL intelligent response (message + highlight + alternative)
+      RecommendationState.updateFromResponse(data);
 
       // Build clean notification message
       final String notificationBody =
