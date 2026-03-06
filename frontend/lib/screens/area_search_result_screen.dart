@@ -253,28 +253,28 @@ class _AreaSearchResultScreenState
   }
 
   // Shortens long address AND removes PLUS CODES if present
-  // String _shortPlace(String address) {
-  //   List<String> parts = address.split(",");
+  String _shortPlace(String address) {
+    List<String> parts = address.split(",");
 
-  //   if (parts.isEmpty) return address;
+    if (parts.isEmpty) return address;
 
-  //   // If first part contains Google Plus Code
-  //   if (parts[0].contains("+")) {
-  //     if (parts.length >= 3) {
-  //       return "${parts[1].trim()}, ${parts[2].trim()}";
-  //     } else if (parts.length >= 2) {
-  //       return parts[1].trim();
-  //     }
-  //     return address;
-  //   }
+    // If first part contains Google Plus Code
+    if (parts[0].contains("+")) {
+      if (parts.length >= 3) {
+        return "${parts[1].trim()}, ${parts[2].trim()}";
+      } else if (parts.length >= 2) {
+        return parts[1].trim();
+      }
+      return address;
+    }
 
-  //   // Normal case: first two segments only
-  //   if (parts.length >= 2) {
-  //     return "${parts[0].trim()}, ${parts[1].trim()}";
-  //   }
+    // Normal case: first two segments only
+    if (parts.length >= 2) {
+      return "${parts[0].trim()}, ${parts[1].trim()}";
+    }
 
-  //   return parts[0].trim();
-  // }
+    return parts[0].trim();
+  }
 
   @override
   void dispose() {
@@ -359,29 +359,29 @@ class _AreaSearchResultScreenState
                                     //     ),
                                     //   ),
 
-                                    // if (site["place_name"] != null)
-                                    //   Padding(
-                                    //     padding: const EdgeInsets.only(top: 4),
-                                    //     child: Row(
-                                    //       children: [
-                                    //         const Icon(
-                                    //           Icons.location_on,
-                                    //           size: 16,
-                                    //           color: Colors.grey,
-                                    //         ),
-                                    //         const SizedBox(width: 4),
-                                    //         Expanded(
-                                    //           child: Text(
-                                    //             _shortPlace(site["place_name"]),
-                                    //             style: const TextStyle(
-                                    //               fontSize: 13,
-                                    //               color: Colors.black54,
-                                    //             ),
-                                    //           ),
-                                    //         ),
-                                    //       ],
-                                    //     ),
-                                    //   ),
+                                    if (site["place_name"] != null)
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 4),
+                                        child: Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.location_on,
+                                              size: 16,
+                                              color: Colors.grey,
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Expanded(
+                                              child: Text(
+                                                _shortPlace(site["place_name"]),
+                                                style: const TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.black54,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
 
                                     const SizedBox(height: 6),
 
@@ -482,7 +482,18 @@ class _AreaSearchResultScreenState
 
                                     const SizedBox(height: 14),
 
-                                    if (events.isNotEmpty)
+                                    if (events.isNotEmpty) ...[
+                                      const Text(
+                                        "Ancient Events",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18,
+                                          color: Color(0xFFB8860B),
+                                        ),
+                                      ),
+
+                                      const SizedBox(height: 8),
+
                                       ...events.map((e) =>
                                           Padding(
                                             padding: const EdgeInsets.only(bottom: 12),
@@ -516,6 +527,7 @@ class _AreaSearchResultScreenState
                                               ],
                                             ),
                                           )),
+                                    ],
 
                                     const SizedBox(height: 14),
 

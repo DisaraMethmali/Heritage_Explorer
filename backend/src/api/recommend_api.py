@@ -545,3 +545,62 @@ def search_area():
         "cluster": cluster_id,
         "results": results[:3]   # limit top 3
     })
+
+# API 5: Search Heritage Site by Name
+@recommend_api.route("/search-site", methods=["POST"])
+def search_site():
+
+    data = request.get_json()
+    site_name = data.get("site_name")
+    user_lat = data.get("user_lat")
+    user_lon = data.get("user_lon")
+
+    if not site_name:
+        return jsonify({"error": "site_name required"}), 400
+
+    # Find matching sites
+    matches = df[
+        df["site_name"].str.contains(site_name, case=False, na=False)
+    ].drop_duplicates(subset=["site_id"])
+
+    if matches.empty:
+        return jsonify({"error": "Site not found"}), 404
+
+    results = []
+
+    for _, row in matches.iterrows():
+
+        road_km = None
+
+        if user_lat and user_lon:
+            road_km = get_road_distance(
+                user_lat, user_lon,
+                row["lat"], row["lon"]
+            )
+
+        place_name = get_place_name(row["lat"], row["lon"])
+
+        weather = get_weather(row["lat"], row["lon"])
+        disaster = get_disaster_status(row["lat"], row["lon"])
+        status = evaluate_site_safety(weather, disaster)
+
+        events = df[df["site_id"] == row["site_id"]][
+            ["event_name", "year", "description"]
+        ].to_dict(orient="records")
+
+        results.append({
+            "site_id": row["site_id"],
+            "site_name": row["site_name"],
+            "lat": row["lat"],
+            "lon": row["lon"],
+            "place_name": place_name,
+            "distance_km": road_km,
+            "weather": weather,
+            "disaster": disaster,
+            "safety_status": status,
+            "events": events
+        })
+
+    return jsonify({
+        "results": results
+    })

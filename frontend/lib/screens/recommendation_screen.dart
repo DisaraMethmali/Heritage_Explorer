@@ -6,6 +6,7 @@ import '../services/location_monitor.dart';
 import '../state/user_location_state.dart';
 import 'map_route_screen.dart';
 import 'area_search_result_screen.dart';
+import 'site_search_screen.dart';
 
 class RecommendationScreen extends StatefulWidget {
   const RecommendationScreen({super.key});
@@ -41,12 +42,27 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.search),
+            icon: const Icon(Icons.location_on),
+            visualDensity: const VisualDensity(horizontal: -2),
+            padding: EdgeInsets.zero,
             onPressed: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => const AreaSearchResultScreen(),
+                ),
+              );
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.account_balance),
+            visualDensity: const VisualDensity(horizontal: -2),
+            padding: EdgeInsets.zero,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const SiteSearchScreen(),
                 ),
               );
             },
