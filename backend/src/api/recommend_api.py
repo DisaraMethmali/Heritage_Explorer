@@ -169,6 +169,43 @@ def evaluate_site_safety(weather, disaster):
 
     return "SAFE"
 
+# Convert Area Name to longitude/latitude
+def get_coordinates_from_area(area_name):
+    try:
+        url = (
+            f"https://maps.googleapis.com/maps/api/geocode/json?"
+            f"address={area_name}&key={GOOGLE_API_KEY}"
+        )
+
+        res = requests.get(url).json()
+
+        if res["results"]:
+            location = res["results"][0]["geometry"]["location"]
+            return location["lat"], location["lng"]
+
+        return None, None
+
+    except Exception:
+        return None, None
+
+# Get the place name
+def get_place_name(lat, lon):
+    try:
+        url = (
+            f"https://maps.googleapis.com/maps/api/geocode/json?"
+            f"latlng={lat},{lon}&key={GOOGLE_API_KEY}"
+        )
+
+        res = requests.get(url).json()
+
+        if res["results"]:
+            return res["results"][0]["formatted_address"]
+
+        return None
+
+    except Exception:
+        return None
+
 # API 1: Predict cluster for user's GPS location
 @recommend_api.route("/predict-cluster", methods=["POST"])
 def predict_cluster():
@@ -428,4 +465,83 @@ def recommend_nearby():
         "highlight_site_id": highlight_site_id,
         "recommendation_message": recommendation_message,
         "alternative_site": alternative_site
+    })
+
+# API 4: Manual Area Search
+@recommend_api.route("/search-area", methods=["POST"])
+def search_area():
+    data = request.get_json()
+    area = data.get("area")
+    user_lat = data.get("user_lat")
+    user_lon = data.get("user_lon")
+
+    if not area or user_lat is None or user_lon is None:
+        return jsonify({"error": "area and user location required"}), 400
+
+    # 1. Convert area to coordinates
+    area_lat, area_lon = get_coordinates_from_area(area)
+
+    if area_lat is None:
+        return jsonify({"error": "Area not found"}), 404
+
+    # 2. Predict cluster for that area
+    cluster_scaled = scaler.transform(np.array([[area_lat, area_lon]]))
+    cluster_id = int(model.predict(cluster_scaled)[0])
+
+    # 3. Get cluster sites
+    cluster_sites = df[df["cluster"] == cluster_id] \
+        .drop_duplicates(subset=["site_id"])
+
+    results = []
+
+    for _, row in cluster_sites.iterrows():
+
+        # Distance from USER location
+        road_user_km = get_road_distance(
+            user_lat, user_lon,
+            row["lat"], row["lon"]
+        )
+
+        # Distance from SEARCHED AREA
+        road_area_km = get_road_distance(
+            area_lat, area_lon,
+            row["lat"], row["lon"]
+        )
+
+        # If either distance fails, skip this site
+        if road_user_km is None or road_area_km is None:
+            continue
+
+        # Get Place Name
+        place_name = get_place_name(row["lat"], row["lon"])
+
+        weather = get_weather(row["lat"], row["lon"])
+        disaster = get_disaster_status(row["lat"], row["lon"])
+        status = evaluate_site_safety(weather, disaster)
+
+        events = df[df["site_id"] == row["site_id"]][
+            ["event_name", "year", "description"]
+        ].to_dict(orient="records")
+
+        results.append({
+            "site_id": row["site_id"],
+            "site_name": row["site_name"],
+            "place_name": place_name,
+            "lat": row["lat"],
+            "lon": row["lon"],
+            "distance_from_user_km": round(road_user_km, 2),
+            "distance_from_area_km": round(road_area_km, 2),
+            "weather": weather,
+            "disaster": disaster,
+            "safety_status": status,
+            "events": events
+        })
+
+    # Sort by distance from user
+    results.sort(key=lambda x: x["distance_from_area_km"])
+
+    return jsonify({
+        "searched_area": area,
+        "cluster": cluster_id,
+        "results": results[:3]   # limit top 3
     })

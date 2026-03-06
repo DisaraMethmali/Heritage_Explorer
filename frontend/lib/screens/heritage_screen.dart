@@ -8,7 +8,7 @@ import '../utils/config.dart';
 import '../state/geo_state.dart';
 import 'vr_screen.dart';
 import '../state/session_state.dart';
-import 'session_report_screen.dart';
+// import 'session_report_screen.dart';
 
 class HeritageScreen extends StatefulWidget {
   final String siteName;
@@ -331,20 +331,20 @@ class _HeritageScreenState extends State<HeritageScreen> {
             ),
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.description_outlined),
-            tooltip: "Session Report",
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => const SessionReportScreen(),
-                ),
-              );
-            },
-          ),
-        ],
+        // actions: [
+        //   IconButton(
+        //     icon: const Icon(Icons.description_outlined),
+        //     tooltip: "Session Report",
+        //     onPressed: () {
+        //       Navigator.push(
+        //         context,
+        //         MaterialPageRoute(
+        //           builder: (_) => const SessionReportScreen(),
+        //         ),
+        //       );
+        //     },
+        //   ),
+        // ],
       ),
       
       // SafeArea prevents bottom-bar overlapping UI

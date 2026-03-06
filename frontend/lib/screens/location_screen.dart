@@ -43,6 +43,10 @@ class _LocationScreenState extends State<LocationScreen> {
   bool isAtHeritageSite = false;
   List<Map<String, dynamic>> eventsList = [];
 
+  Map<String, dynamic>? weather;
+  Map<String, dynamic>? disaster;
+  String? safetyStatus;
+
   Timer? _autoTimer;   // SMART AUTO UPDATE TIMER
 
   @override
@@ -193,6 +197,10 @@ class _LocationScreenState extends State<LocationScreen> {
         siteId = data["site_id"];
         eventsList = List<Map<String, dynamic>>.from(data["events"]);
 
+        weather = data["weather"];
+        disaster = data["disaster"];
+        safetyStatus = data["safety_status"];
+
         // destination coords from backend
         _destLat = data["site_lat"];
         _destLon = data["site_lon"];
@@ -237,6 +245,46 @@ class _LocationScreenState extends State<LocationScreen> {
 
     // Default behavior: return first two segments
     return parts.take(2).join(",").trim();
+  }
+
+  // Safety Badge
+  Widget _buildSafetyBadge(String status) {
+    Color bgColor;
+    Color textColor;
+
+    switch (status) {
+      case "SAFE":
+        bgColor = Colors.green.shade100;
+        textColor = Colors.green.shade800;
+        break;
+      case "CAUTION":
+        bgColor = Colors.orange.shade100;
+        textColor = Colors.orange.shade800;
+        break;
+      case "UNSAFE":
+        bgColor = Colors.red.shade100;
+        textColor = Colors.red.shade800;
+        break;
+      default:
+        bgColor = Colors.grey.shade200;
+        textColor = Colors.grey.shade800;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        status,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.bold,
+          color: textColor,
+        ),
+      ),
+    );
   }
 
   @override
@@ -420,6 +468,90 @@ class _LocationScreenState extends State<LocationScreen> {
                                             color: Colors.black54,
                                           ),
                                         ),
+
+                                        const SizedBox(height: 8),
+
+                                        if (safetyStatus != null)
+                                          _buildSafetyBadge(safetyStatus!),
+
+                                        const SizedBox(height: 4),
+
+                                        if (weather != null)                                         
+                                          Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                children: [
+                                                  if (weather!["icon"] != null)
+                                                    Image.network(
+                                                      "https:${weather!["icon"]}",
+                                                      width: 40,
+                                                      height: 40,
+                                                    ),
+
+                                                  const SizedBox(width: 8),
+
+                                                  Text(
+                                                    weather!["condition"] ?? "",
+                                                    style: const TextStyle(
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+
+                                              const SizedBox(height: 4),
+
+                                              Text(
+                                                "${weather!["temperature_c"] ?? "--"}°C • "
+                                                "Humidity ${weather!["humidity"] ?? "--"}% • "
+                                                "Wind ${weather!["wind_kph"] ?? "--"} km/h",
+                                                textAlign: TextAlign.center,
+                                                style: const TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.black54,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+
+                                        const SizedBox(height: 4),
+                                        
+                                        if (disaster != null)
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                disaster!["has_alert"] == true
+                                                    ? Icons.warning
+                                                    : Icons.check_circle,
+                                                color: disaster!["has_alert"] == true
+                                                    ? (disaster!["risk_level"] == "High"
+                                                        ? Colors.red
+                                                        : Colors.orange)
+                                                    : Colors.green,
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Flexible(
+                                                child: Text(
+                                                  disaster!["has_alert"] == true
+                                                      ? disaster!["message"] ?? "Weather Alert"
+                                                      : "No active disaster alerts",
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.w600,
+                                                    color: disaster!["has_alert"] == true
+                                                        ? (disaster!["risk_level"] == "High"
+                                                            ? Colors.red
+                                                            : Colors.orange)
+                                                        : Colors.green,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                       ],
                                     ),
                                 ],

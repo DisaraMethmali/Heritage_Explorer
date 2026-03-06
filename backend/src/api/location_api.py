@@ -1,14 +1,19 @@
 # backend/src/api/location_api.py
 
-from flask import Flask, request, jsonify
-from flask_cors import CORS
+from flask import Blueprint, request, jsonify
 from geopy.geocoders import Nominatim   # Will not be used now except fallback
 import pandas as pd
 import os
 import requests
 
-app = Flask(__name__)
-CORS(app)
+# Import safety + weather logic from recommend_api
+from api.recommend_api import (
+    get_weather,
+    get_disaster_status,
+    evaluate_site_safety
+)
+
+location_api = Blueprint("location_api", __name__)
 
 # Load datasets
 base_dir = os.path.dirname(__file__)
@@ -56,7 +61,7 @@ def get_road_distance(lat1, lon1, lat2, lon2):
     return None, None
 
 # MAIN /location ENDPOINT
-@app.route("/location", methods=["POST"])
+@location_api.route("/location", methods=["POST"])
 def receive_location():
     data = request.get_json()
     lat = data.get("latitude")
@@ -95,6 +100,11 @@ def receive_location():
     # Get events for that site
     related_events = df_events[df_events["site_id"] == nearest["site_id"]].to_dict(orient="records")
 
+    # WEATHER + DISASTER STATUS
+    weather = get_weather(nearest["site_lat"], nearest["site_lon"])
+    disaster = get_disaster_status(nearest["site_lat"], nearest["site_lon"])
+    safety_status = evaluate_site_safety(weather, disaster)
+
     # Return JSON Response
     return jsonify({
         "status": "success",
@@ -109,6 +119,10 @@ def receive_location():
 
         "road_distance_km": round(nearest["road_distance_km"], 1),
         "duration": nearest["duration"],
+
+        "weather": weather,
+        "disaster": disaster,
+        "safety_status": safety_status,
 
         "events": related_events
     })

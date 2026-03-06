@@ -5,6 +5,7 @@ import '../state/recommendation_state.dart';
 import '../services/location_monitor.dart';
 import '../state/user_location_state.dart';
 import 'map_route_screen.dart';
+import 'area_search_result_screen.dart';
 
 class RecommendationScreen extends StatefulWidget {
   const RecommendationScreen({super.key});
@@ -21,6 +22,7 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
     setState(() {}); // rebuild UI with updated recommendation
   }
 
+  // UI BUILD
   @override
   Widget build(BuildContext context) {
     final hasData = RecommendationState.hasRecommendation;
@@ -37,6 +39,19 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
           "Recommended for You",
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const AreaSearchResultScreen(),
+                ),
+              );
+            },
+          ),
+        ],
       ),
 
       body: SafeArea(
